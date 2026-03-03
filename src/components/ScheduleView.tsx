@@ -15,7 +15,7 @@ export const ScheduleView = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'day' | 'week'>('day');
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  const { todos, addTodo, toggleComplete, deleteTodo, updateTodo, reviewPeriod } = useTodos();
+  const { todos, addTodo, toggleComplete, deleteTodo, updateTodo, addSubtask, toggleSubtask, deleteSubtask, reviewPeriod } = useTodos();
 
   useEffect(() => {
     if (reviewPeriod === 'week') {
@@ -62,7 +62,6 @@ export const ScheduleView = () => {
       date: dateStr,
       completed: false,
       priority: newTaskPriority,
-      subtasks: [],
     });
     setNewTaskTitle('');
     setNewTaskPriority('medium');
@@ -72,36 +71,8 @@ export const ScheduleView = () => {
     e.preventDefault();
     const title = newSubtaskTitles[todoId];
     if (!title?.trim()) return;
-    
-    const todo = todos.find(t => t.id === todoId);
-    if (!todo) return;
-    
-    const newSubtask = { id: crypto.randomUUID(), title: title.trim(), completed: false };
-    updateTodo(todoId, { subtasks: [...(todo.subtasks || []), newSubtask] });
+    addSubtask(todoId, title.trim());
     setNewSubtaskTitles(prev => ({ ...prev, [todoId]: '' }));
-  };
-
-  const toggleSubtask = (todoId: string, subtaskId: string) => {
-    const todo = todos.find(t => t.id === todoId);
-    if (!todo) return;
-    
-    const newSubtasks = (todo.subtasks || []).map(st => 
-      st.id === subtaskId ? { ...st, completed: !st.completed } : st
-    );
-    
-    // Auto-complete main task if all subtasks are completed and there is at least one subtask
-    const allCompleted = newSubtasks.length > 0 && newSubtasks.every(st => st.completed);
-    
-    updateTodo(todoId, { 
-      subtasks: newSubtasks,
-      ...(allCompleted && !todo.completed ? { completed: true, completedAt: Date.now() } : {})
-    });
-  };
-
-  const deleteSubtask = (todoId: string, subtaskId: string) => {
-    const todo = todos.find(t => t.id === todoId);
-    if (!todo) return;
-    updateTodo(todoId, { subtasks: (todo.subtasks || []).filter(st => st.id !== subtaskId) });
   };
 
   const handleImageUpload = (todoId: string, file: File) => {

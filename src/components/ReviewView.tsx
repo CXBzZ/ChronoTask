@@ -47,7 +47,7 @@ export const ReviewView = () => {
     const relevantTodos = todos.filter((t) => {
       const taskDate = parseISO(t.date);
       const inDate = isWithinInterval(taskDate, { start, end });
-      const inCompleted = t.completedAt ? isWithinInterval(new Date(t.completedAt), { start, end }) : false;
+      const inCompleted = t.completed_at ? isWithinInterval(new Date(t.completed_at), { start, end }) : false;
       return inDate || inCompleted;
     });
 

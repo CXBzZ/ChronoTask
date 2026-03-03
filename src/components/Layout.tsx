@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { Calendar, CheckSquare, Image as ImageIcon } from 'lucide-react';
+import { Calendar, CheckSquare, LogOut } from 'lucide-react';
 import { ScheduleView } from './ScheduleView';
 import { ReviewView } from './ReviewView';
+import { useAuth } from '../AuthContext';
 
 export const Layout = () => {
   const [activeTab, setActiveTab] = useState<'schedule' | 'review'>('schedule');
+  const { user, signOut } = useAuth();
 
   return (
     <div className="min-h-screen bg-zinc-50 flex flex-col md:flex-row">
@@ -40,6 +42,22 @@ export const Layout = () => {
             Review
           </button>
         </nav>
+
+        {/* User info + sign out */}
+        {user && (
+          <div className="p-4 border-t border-zinc-100">
+            <p className="text-xs text-zinc-500 truncate mb-2" title={user.email}>
+              {user.email}
+            </p>
+            <button
+              onClick={signOut}
+              className="flex items-center gap-2 px-3 py-2 w-full text-sm text-zinc-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              退出登录
+            </button>
+          </div>
+        )}
       </aside>
 
       {/* Main Content */}
