@@ -1,0 +1,5 @@
+{
+  "name": "ChronoTask",
+  "description": "A schedule and to-do list app with date-based task management, progress review, and AI-powered image editing.",
+  "requestFramePermissions": []
+}
