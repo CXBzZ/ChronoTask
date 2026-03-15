@@ -1,69 +1,128 @@
 import React, { useState } from 'react';
-import { Calendar, CheckSquare, LogOut } from 'lucide-react';
-import { ScheduleView } from './ScheduleView';
+import { LogOut, LayoutList, BarChart3 } from 'lucide-react';
+import { ListSidebar } from './ListSidebar';
+import { ListView } from './ListView';
 import { ReviewView } from './ReviewView';
+import { useTodos } from '../TodoContext';
 import { useAuth } from '../AuthContext';
 
 export const Layout = () => {
-  const [activeTab, setActiveTab] = useState<'schedule' | 'review'>('schedule');
+  const [activeTab, setActiveTab] = useState<'list' | 'review'>('list');
+  const {
+    todos,
+    lists,
+    isLoading,
+    isMigrating,
+    selectedListId,
+    setSelectedListId,
+    addTodo,
+    updateTodo,
+    deleteTodo,
+    toggleComplete,
+    addSubtask,
+    toggleSubtask,
+    deleteSubtask,
+    createList,
+    updateList,
+    deleteList,
+    smartListCounts,
+    reviewPeriod,
+    setReviewPeriod,
+  } = useTodos();
   const { user, signOut } = useAuth();
+
+  if (isMigrating) {
+    return (
+      <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-zinc-600">正在初始化数据...</p>
+          <p className="text-sm text-zinc-400 mt-2">首次使用需要几秒钟</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-zinc-50 flex flex-col md:flex-row">
       {/* Sidebar */}
-      <aside className="w-full md:w-64 bg-white border-r border-zinc-200 flex flex-col">
-        <div className="p-6 border-b border-zinc-100">
-          <h1 className="text-xl font-bold tracking-tight text-zinc-900 flex items-center gap-2">
-            <CheckSquare className="w-6 h-6 text-indigo-600" />
-            ChronoTask
-          </h1>
-        </div>
-        <nav className="flex-1 p-4 space-y-1 flex flex-row md:flex-col overflow-x-auto md:overflow-visible">
-          <button
-            onClick={() => setActiveTab('schedule')}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors w-full ${
-              activeTab === 'schedule'
-                ? 'bg-indigo-50 text-indigo-700'
-                : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'
-            }`}
-          >
-            <Calendar className="w-5 h-5" />
-            Schedule
-          </button>
-          <button
-            onClick={() => setActiveTab('review')}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors w-full ${
-              activeTab === 'review'
-                ? 'bg-indigo-50 text-indigo-700'
-                : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'
-            }`}
-          >
-            <CheckSquare className="w-5 h-5" />
-            Review
-          </button>
-        </nav>
-
-        {/* User info + sign out */}
-        {user && (
-          <div className="p-4 border-t border-zinc-100">
-            <p className="text-xs text-zinc-500 truncate mb-2" title={user.email}>
-              {user.email}
-            </p>
-            <button
-              onClick={signOut}
-              className="flex items-center gap-2 px-3 py-2 w-full text-sm text-zinc-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-            >
-              <LogOut className="w-4 h-4" />
-              退出登录
-            </button>
-          </div>
-        )}
-      </aside>
+      <ListSidebar
+        lists={lists}
+        smartListCounts={smartListCounts}
+        selectedListId={selectedListId}
+        onSelectList={setSelectedListId}
+        onCreateList={createList}
+        onUpdateList={updateList}
+        onDeleteList={deleteList}
+      />
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col h-screen overflow-hidden">
-        {activeTab === 'schedule' ? <ScheduleView /> : <ReviewView />}
-      </main>
+      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+        {/* Top Navigation */}
+        <header className="bg-white border-b border-zinc-200 px-6 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-1 bg-zinc-100 p-1 rounded-lg">
+            <button
+              onClick={() => setActiveTab('list')}
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                activeTab === 'list'
+                  ? 'bg-white text-indigo-700 shadow-sm'
+                  : 'text-zinc-600 hover:text-zinc-900'
+              }`}
+            >
+              <LayoutList className="w-4 h-4" />
+              任务
+            </button>
+            <button
+              onClick={() => setActiveTab('review')}
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                activeTab === 'review'
+                  ? 'bg-white text-indigo-700 shadow-sm'
+                  : 'text-zinc-600 hover:text-zinc-900'
+              }`}
+            >
+              <BarChart3 className="w-4 h-4" />
+              统计
+            </button>
+          </div>
+
+          {/* User Info */}
+          <div className="flex items-center gap-4">
+            {user && (
+              <>
+                <span className="text-sm text-zinc-500 hidden sm:block">{user.email}</span>
+                <button
+                  onClick={signOut}
+                  className="flex items-center gap-2 px-3 py-2 text-sm text-zinc-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden sm:inline">退出</span>
+                </button>
+              </>
+            )}
+          </div>
+        </header>
+
+        {/* Content Area */}
+        <main className="flex-1 overflow-hidden">
+          {activeTab === 'list' ? (
+            <ListView
+              selectedListId={selectedListId}
+              lists={lists}
+              todos={todos}
+              isLoading={isLoading}
+              onAddTodo={addTodo}
+              onUpdateTodo={updateTodo}
+              onDeleteTodo={deleteTodo}
+              onToggleComplete={toggleComplete}
+              onAddSubtask={addSubtask}
+              onToggleSubtask={toggleSubtask}
+              onDeleteSubtask={deleteSubtask}
+            />
+          ) : (
+            <ReviewView />
+          )}
+        </main>
+      </div>
     </div>
   );
 };
