@@ -1,6 +1,6 @@
 # ChronoTask 开发进度
 
-## 当前状态：Sprint 2 已完成 ✅
+## 当前状态：Sprint 3 已完成 ✅
 
 ---
 
@@ -22,17 +22,17 @@
 - [x] 重构 ListView 集成编辑弹窗
 - [x] 优化任务卡片 UI（显示描述预览、清单标签、日期等）
 
+### Sprint 3: 提醒系统 ✅
+- [x] Reminders 数据库表
+- [x] Reminders API（含 check 接口）
+- [x] ReminderModal 提醒设置弹窗
+- [x] 应用内提醒通知（Toast 形式）
+- [x] 前端轮询检查提醒逻辑
+- [x] 支持单次/每天/每周/每月/自定义重复规则
+
 ---
 
 ## 待开发功能
-
-### Sprint 3: 提醒系统 📋
-- [ ] Reminders 数据库表
-- [ ] Reminders API（含 check 接口）
-- [ ] ReminderModal 提醒设置弹窗
-- [ ] ReminderBadge 侧边栏红点提醒
-- [ ] 应用内提醒通知（Toast 形式）
-- [ ] 前端轮询检查提醒逻辑
 
 ### Sprint 4: 标签 + 重复任务 📋
 - [ ] Tags 数据库表
@@ -54,23 +54,23 @@
 ## 最新提交
 
 ```
-commit 3298f77
+commit 21eae6c
 Author: Dev Claw <dev@cxbzz.github.io>
 Date:   2026-03-18
 
-    feat: Sprint 2 - 任务编辑弹窗与选择器组件
+    feat: Sprint 3 - 提醒系统
 ```
 
 ---
 
 ## 下一步行动
 
-**Sprint 3: 提醒系统**
+**Sprint 4: 标签 + 重复任务**
 
-需要开始开发提醒功能，包括：
-1. 创建 reminders 数据库表
-2. 实现提醒 CRUD API
-3. 开发 ReminderModal 弹窗
-4. 实现应用内提醒通知
+需要开始开发：
+1. 创建 tags 数据库表和关联表
+2. 实现标签 CRUD API
+3. 开发 TagSelector 组件
+4. 实现重复任务生成算法
 
-是否开始 Sprint 3?
+是否开始 Sprint 4?
