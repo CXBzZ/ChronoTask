@@ -38,13 +38,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         onClick={onClose}
       />
 
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+      <div className="relative bg-white dark:bg-zinc-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
-          <h2 className="text-lg font-semibold text-zinc-900">设置</h2>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100 dark:border-zinc-700">
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">设置</h2>
           <button
             onClick={onClose}
-            className="p-2 text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 rounded-lg transition-colors"
+            className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded-lg transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -52,13 +52,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
         <div className="flex">
           {/* Sidebar */}
-          <div className="w-40 border-r border-zinc-100 py-4">
+          <div className="w-40 border-r border-zinc-100 dark:border-zinc-700 py-4">
             <button
               onClick={() => setActiveTab('general')}
               className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors ${
                 activeTab === 'general'
-                  ? 'bg-indigo-50 text-indigo-700'
-                  : 'text-zinc-600 hover:bg-zinc-50'
+                  ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400'
+                  : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-700'
               }`}
             >
               <Globe className="w-4 h-4" />
@@ -68,8 +68,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               onClick={() => setActiveTab('account')}
               className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors ${
                 activeTab === 'account'
-                  ? 'bg-indigo-50 text-indigo-700'
-                  : 'text-zinc-600 hover:bg-zinc-50'
+                  ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400'
+                  : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-700'
               }`}
             >
               <User className="w-4 h-4" />
@@ -79,8 +79,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               onClick={() => setActiveTab('about')}
               className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors ${
                 activeTab === 'about'
-                  ? 'bg-indigo-50 text-indigo-700'
-                  : 'text-zinc-600 hover:bg-zinc-50'
+                  ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400'
+                  : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-700'
               }`}
             >
               <Info className="w-4 h-4" />
@@ -94,12 +94,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-zinc-100 rounded-lg flex items-center justify-center">
-                      <Bell className="w-4 h-4 text-zinc-600" />
+                    <div className="w-8 h-8 bg-zinc-100 dark:bg-zinc-700 rounded-lg flex items-center justify-center">
+                      <Bell className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-zinc-900">通知</p>
-                      <p className="text-xs text-zinc-500">应用内提醒</p>
+                      <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">通知</p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400">应用内提醒</p>
                     </div>
                   </div>
                   <div className="w-11 h-6 bg-indigo-600 rounded-full relative">
@@ -109,18 +109,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-zinc-100 rounded-lg flex items-center justify-center">
-                      <Moon className="w-4 h-4 text-zinc-600" />
+                    <div className="w-8 h-8 bg-zinc-100 dark:bg-zinc-700 rounded-lg flex items-center justify-center">
+                      <Moon className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-zinc-900">深色模式</p>
-                      <p className="text-xs text-zinc-500">切换主题颜色</p>
+                      <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">深色模式</p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400">切换主题颜色</p>
                     </div>
                   </div>
                   <button
                     onClick={toggleDarkMode}
                     className={`w-11 h-6 rounded-full relative transition-colors ${
-                      isDark ? 'bg-indigo-600' : 'bg-zinc-200'
+                      isDark ? 'bg-indigo-600' : 'bg-zinc-200 dark:bg-zinc-600'
                     }`}
                   >
                     <div
@@ -135,13 +135,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
             {activeTab === 'account' && (
               <div className="space-y-6">
-                <div className="flex items-center gap-4 p-4 bg-zinc-50 rounded-xl">
-                  <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
-                    <User className="w-6 h-6 text-indigo-600" />
+                <div className="flex items-center gap-4 p-4 bg-zinc-50 dark:bg-zinc-700/50 rounded-xl">
+                  <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center">
+                    <User className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-zinc-900">当前用户</p>
-                    <p className="text-sm text-zinc-500">{userEmail || '未登录'}</p>
+                    <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">当前用户</p>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400">{userEmail || '未登录'}</p>
                   </div>
                 </div>
 
@@ -152,7 +152,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       onClose();
                     }
                   }}
-                  className="flex items-center gap-2 w-full px-4 py-3 text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors"
+                  className="flex items-center gap-2 w-full px-4 py-3 text-red-600 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-xl transition-colors"
                 >
                   <LogOut className="w-5 h-5" />
                   <span className="font-medium">退出登录</span>
@@ -168,15 +168,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-zinc-900">ChronoTask</h3>
-                  <p className="text-sm text-zinc-500">版本 v1.0.0</p>
+                  <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">ChronoTask</h3>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400">版本 v1.0.0</p>
                 </div>
-                <p className="text-sm text-zinc-600">
+                <p className="text-sm text-zinc-600 dark:text-zinc-400">
                   一个简洁、高效的任务管理应用。
                   <br />
                   支持清单、提醒、标签、重复任务和番茄专注。
                 </p>
-                <p className="text-xs text-zinc-400">© 2026 ChronoTask. All rights reserved.</p>
+                <p className="text-xs text-zinc-400 dark:text-zinc-500">© 2026 ChronoTask. All rights reserved.</p>
               </div>
             )}
           </div>

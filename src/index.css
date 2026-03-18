@@ -9,6 +9,13 @@
 }
 
 .dark body {
-  background-color: #18181b; /* zinc-900 */
-  color: #f4f4f5; /* zinc-100 */
+  background-color: #18181b;
+  color: #f4f4f5;
+}
+
+/* 深色模式通用过渡效果 */
+.dark * {
+  transition-property: background-color, border-color, color;
+  transition-duration: 150ms;
+  transition-timing-function: ease-in-out;
 }

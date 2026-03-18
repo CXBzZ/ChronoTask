@@ -5,10 +5,8 @@ import {
   CalendarDays,
   CheckCircle2,
   Plus,
-  MoreHorizontal,
   Trash2,
   Edit2,
-  GripVertical,
   Settings,
 } from 'lucide-react';
 import { TaskList, SmartListType } from '../types';
@@ -48,14 +46,14 @@ const SMART_LIST_LABELS: Record<SmartListType, string> = {
 };
 
 const LIST_COLORS = [
-  '#6366f1', // indigo
-  '#ef4444', // red
-  '#f59e0b', // amber
-  '#10b981', // emerald
-  '#3b82f6', // blue
-  '#8b5cf6', // violet
-  '#ec4899', // pink
-  '#14b8a6', // teal
+  '#6366f1',
+  '#ef4444',
+  '#f59e0b',
+  '#10b981',
+  '#3b82f6',
+  '#8b5cf6',
+  '#ec4899',
+  '#14b8a6',
 ];
 
 export const ListSidebar: React.FC<ListSidebarProps> = ({
@@ -107,12 +105,12 @@ export const ListSidebar: React.FC<ListSidebarProps> = ({
         onClick={() => onSelectList(type)}
         className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
           isSelected
-            ? 'bg-indigo-50 text-indigo-700 shadow-sm'
-            : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'
+            ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 shadow-sm'
+            : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100'
         }`}
       >
         <div className="flex items-center gap-3">
-          <span className={isSelected ? 'text-indigo-600' : 'text-zinc-400'}>
+          <span className={isSelected ? 'text-indigo-600 dark:text-indigo-400' : 'text-zinc-400 dark:text-zinc-500'}>
             {SMART_LIST_ICONS[type]}
           </span>
           <span>{SMART_LIST_LABELS[type]}</span>
@@ -120,7 +118,9 @@ export const ListSidebar: React.FC<ListSidebarProps> = ({
         {count > 0 && (
           <span
             className={`text-xs px-2 py-0.5 rounded-full ${
-              isSelected ? 'bg-indigo-100 text-indigo-700' : 'bg-zinc-100 text-zinc-500'
+              isSelected
+                ? 'bg-indigo-100 dark:bg-indigo-800 text-indigo-700 dark:text-indigo-300'
+                : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'
             }`}
           >
             {count}
@@ -131,10 +131,10 @@ export const ListSidebar: React.FC<ListSidebarProps> = ({
   };
 
   return (
-    <div className="h-full flex flex-col bg-white border-r border-zinc-200 w-64">
+    <div className="h-full flex flex-col bg-white dark:bg-zinc-800 border-r border-zinc-200 dark:border-zinc-700 w-64">
       {/* Header */}
-      <div className="p-4 border-b border-zinc-100">
-        <h1 className="text-xl font-bold text-zinc-900 flex items-center gap-2">
+      <div className="p-4 border-b border-zinc-100 dark:border-zinc-700">
+        <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
           <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center">
             <CheckCircle2 className="w-5 h-5 text-white" />
           </div>
@@ -163,7 +163,7 @@ export const ListSidebar: React.FC<ListSidebarProps> = ({
             </p>
             <button
               onClick={() => setIsCreating(true)}
-              className="p-1 text-zinc-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+              className="p-1 text-zinc-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
               title="新建清单"
             >
               <Plus className="w-4 h-4" />
@@ -185,7 +185,7 @@ export const ListSidebar: React.FC<ListSidebarProps> = ({
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
                     autoFocus
-                    className="w-full px-3 py-2 text-sm border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 text-sm bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     onBlur={() => {
                       setEditingList(null);
                       setEditName('');
@@ -200,8 +200,8 @@ export const ListSidebar: React.FC<ListSidebarProps> = ({
                 key={list.id}
                 className={`group flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer ${
                   isSelected
-                    ? 'bg-indigo-50 text-indigo-700 shadow-sm'
-                    : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'
+                    ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 shadow-sm'
+                    : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100'
                 }`}
                 onClick={() => onSelectList(list.id)}
               >
@@ -220,7 +220,7 @@ export const ListSidebar: React.FC<ListSidebarProps> = ({
                       setEditingList(list);
                       setEditName(list.name);
                     }}
-                    className="p-1.5 text-zinc-400 hover:text-zinc-600 hover:bg-zinc-200 rounded-lg"
+                    className="p-1.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg"
                   >
                     <Edit2 className="w-3.5 h-3.5" />
                   </button>
@@ -231,7 +231,7 @@ export const ListSidebar: React.FC<ListSidebarProps> = ({
                         onDeleteList(list.id);
                       }
                     }}
-                    className="p-1.5 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                    className="p-1.5 text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -249,7 +249,7 @@ export const ListSidebar: React.FC<ListSidebarProps> = ({
                 onChange={(e) => setNewListName(e.target.value)}
                 placeholder="清单名称"
                 autoFocus
-                className="w-full px-3 py-2 text-sm border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3 py-2 text-sm bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 onBlur={() => {
                   if (!newListName.trim()) {
                     setIsCreating(false);
@@ -268,10 +268,10 @@ export const ListSidebar: React.FC<ListSidebarProps> = ({
       </div>
 
       {/* Footer */}
-      <div className="p-4 border-t border-zinc-100">
+      <div className="p-4 border-t border-zinc-100 dark:border-zinc-700">
         <button
           onClick={() => setIsSettingsOpen(true)}
-          className="flex items-center gap-3 px-3 py-2 w-full text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 rounded-xl transition-colors"
+          className="flex items-center gap-3 px-3 py-2 w-full text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-700 hover:text-zinc-900 dark:hover:text-zinc-100 rounded-xl transition-colors"
         >
           <Settings className="w-5 h-5" />
           设置

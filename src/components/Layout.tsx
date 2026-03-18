@@ -36,17 +36,15 @@ export const Layout = () => {
     endFocus,
     loadFocusStats,
     smartListCounts,
-    reviewPeriod,
-    setReviewPeriod,
   } = useTodos();
   const { user, signOut } = useAuth();
 
   if (isMigrating) {
     return (
-      <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
+      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-zinc-600">正在初始化数据...</p>
+          <p className="text-zinc-600 dark:text-zinc-400">正在初始化数据...</p>
           <p className="text-sm text-zinc-400 mt-2">首次使用需要几秒钟</p>
         </div>
       </div>
@@ -54,7 +52,7 @@ export const Layout = () => {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 flex flex-col md:flex-row">
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900 flex flex-col md:flex-row">
       {/* Sidebar */}
       <ListSidebar
         lists={lists}
@@ -71,14 +69,14 @@ export const Layout = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Top Navigation */}
-        <header className="bg-white border-b border-zinc-200 px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-1 bg-zinc-100 p-1 rounded-lg">
+        <header className="bg-white dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700 px-6 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-700 p-1 rounded-lg">
             <button
               onClick={() => setActiveTab('list')}
               className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-all ${
                 activeTab === 'list'
-                  ? 'bg-white text-indigo-700 shadow-sm'
-                  : 'text-zinc-600 hover:text-zinc-900'
+                  ? 'bg-white dark:bg-zinc-600 text-indigo-700 dark:text-indigo-400 shadow-sm'
+                  : 'text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white'
               }`}
             >
               <LayoutList className="w-4 h-4" />
@@ -88,8 +86,8 @@ export const Layout = () => {
               onClick={() => setActiveTab('month')}
               className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-all ${
                 activeTab === 'month'
-                  ? 'bg-white text-indigo-700 shadow-sm'
-                  : 'text-zinc-600 hover:text-zinc-900'
+                  ? 'bg-white dark:bg-zinc-600 text-indigo-700 dark:text-indigo-400 shadow-sm'
+                  : 'text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white'
               }`}
             >
               <Calendar className="w-4 h-4" />
@@ -99,8 +97,8 @@ export const Layout = () => {
               onClick={() => setActiveTab('focus')}
               className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-all ${
                 activeTab === 'focus'
-                  ? 'bg-white text-indigo-700 shadow-sm'
-                  : 'text-zinc-600 hover:text-zinc-900'
+                  ? 'bg-white dark:bg-zinc-600 text-indigo-700 dark:text-indigo-400 shadow-sm'
+                  : 'text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white'
               }`}
             >
               <Target className="w-4 h-4" />
@@ -110,8 +108,8 @@ export const Layout = () => {
               onClick={() => setActiveTab('review')}
               className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-all ${
                 activeTab === 'review'
-                  ? 'bg-white text-indigo-700 shadow-sm'
-                  : 'text-zinc-600 hover:text-zinc-900'
+                  ? 'bg-white dark:bg-zinc-600 text-indigo-700 dark:text-indigo-400 shadow-sm'
+                  : 'text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white'
               }`}
             >
               <BarChart3 className="w-4 h-4" />
@@ -123,10 +121,10 @@ export const Layout = () => {
           <div className="flex items-center gap-4">
             {user && (
               <>
-                <span className="text-sm text-zinc-500 hidden sm:block">{user.email}</span>
+                <span className="text-sm text-zinc-500 dark:text-zinc-400 hidden sm:block">{user.email}</span>
                 <button
                   onClick={signOut}
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-zinc-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 text-sm text-zinc-600 dark:text-zinc-300 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                 >
                   <LogOut className="w-4 h-4" />
                   <span className="hidden sm:inline">退出</span>
@@ -167,7 +165,6 @@ export const Layout = () => {
                 setActiveTab('list');
               }}
               onAddTodo={(date) => {
-                // 可以在这里打开添加任务的弹窗
                 console.log('Add todo for date:', date);
               }}
             />
