@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, User, LogOut, Moon, Globe, Bell, Info } from 'lucide-react';
+import { useDarkMode } from '../hooks/useDarkMode';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onSignOut,
 }) => {
   const [activeTab, setActiveTab] = useState<'general' | 'account' | 'about'>('general');
+  const [isDark, toggleDarkMode] = useDarkMode();
 
   // ESC 键关闭
   useEffect(() => {
@@ -115,9 +117,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       <p className="text-xs text-zinc-500">切换主题颜色</p>
                     </div>
                   </div>
-                  <div className="w-11 h-6 bg-zinc-200 rounded-full relative">
-                    <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full" />
-                  </div>
+                  <button
+                    onClick={toggleDarkMode}
+                    className={`w-11 h-6 rounded-full relative transition-colors ${
+                      isDark ? 'bg-indigo-600' : 'bg-zinc-200'
+                    }`}
+                  >
+                    <div
+                      className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                        isDark ? 'right-1' : 'left-1'
+                      }`}
+                    />
+                  </button>
                 </div>
               </div>
             )}

@@ -1,1 +1,14 @@
 @import "tailwindcss";
+
+/* 深色模式配置 - 使用 class 策略 */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* 深色模式下的基础样式 */
+.dark {
+  color-scheme: dark;
+}
+
+.dark body {
+  background-color: #18181b; /* zinc-900 */
+  color: #f4f4f5; /* zinc-100 */
+}
