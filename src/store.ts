@@ -1,5 +1,6 @@
 import { supabase } from './lib/supabase';
-import { Todo, Subtask, TaskList, UserSettings, Reminder, ReminderType } from './types';
+import { Todo, Subtask, TaskList, UserSettings, Reminder, ReminderType, Tag } from './types';
+import { format, addDays, addWeeks, addMonths, parseISO } from 'date-fns';
 
 /** Assemble Todo objects from separate todos + subtasks rows */
 function assembleTodos(
@@ -422,5 +423,216 @@ export async function deleteReminder(id: string): Promise<void> {
       .from('todos')
       .update({ reminder_at: null, reminder_id: null })
       .eq('id', data.todo_id);
+  }
+}
+
+// =============================================
+// Sprint 4: Tags APIs
+// =============================================
+
+export async function loadTags(userId: string): Promise<Tag[]> {
+  const { data, error } = await supabase
+    .from('tags')
+    .select('*')
+    .eq('user_id', userId)
+    .order('name');
+
+  if (error) throw error;
+  return (data || []) as Tag[];
+}
+
+export async function createTag(tag: Omit<Tag, 'id' | 'created_at'>): Promise<Tag> {
+  const { data, error } = await supabase
+    .from('tags')
+    .insert(tag)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data as Tag;
+}
+
+export async function updateTag(id: string, updates: Partial<Tag>): Promise<void> {
+  const { error } = await supabase.from('tags').update(updates).eq('id', id);
+  if (error) throw error;
+}
+
+export async function deleteTag(id: string): Promise<void> {
+  const { error } = await supabase.from('tags').delete().eq('id', id);
+  if (error) throw error;
+}
+
+// 获取任务的标签
+export async function loadTodoTags(todoId: string): Promise<string[]> {
+  const { data, error } = await supabase
+    .from('todo_tags')
+    .select('tag_id')
+    .eq('todo_id', todoId);
+
+  if (error) throw error;
+  return (data || []).map((item) => item.tag_id as string);
+}
+
+// 设置任务的标签
+export async function setTodoTags(todoId: string, tagIds: string[]): Promise<void> {
+  // 先删除现有标签
+  const { error: deleteError } = await supabase
+    .from('todo_tags')
+    .delete()
+    .eq('todo_id', todoId);
+  
+  if (deleteError) throw deleteError;
+
+  // 添加新标签
+  if (tagIds.length > 0) {
+    const { error: insertError } = await supabase
+      .from('todo_tags')
+      .insert(tagIds.map((tagId) => ({ todo_id: todoId, tag_id: tagId })));
+    
+    if (insertError) throw insertError;
+  }
+}
+
+// =============================================
+// Sprint 4: Recurring Tasks APIs
+// =============================================
+
+export async function markTodoRecurring(
+  todoId: string,
+  reminderType: ReminderType,
+  customRule?: Reminder['custom_rule'],
+  generateCount: number = 3
+): Promise<void> {
+  // 获取原始任务
+  const { data: todo, error: todoError } = await supabase
+    .from('todos')
+    .select('*')
+    .eq('id', todoId)
+    .single();
+  
+  if (todoError) throw todoError;
+  if (!todo?.date) throw new Error('Recurring tasks must have a date');
+
+  // 标记为重复任务模板
+  await supabase
+    .from('todos')
+    .update({ is_recurring: true })
+    .eq('id', todoId);
+
+  // 预生成未来任务实例
+  await generateRecurringInstances(todoId, reminderType, customRule, generateCount);
+}
+
+export async function generateRecurringInstances(
+  parentTodoId: string,
+  reminderType: ReminderType,
+  customRule?: Reminder['custom_rule'],
+  count: number = 3
+): Promise<Todo[]> {
+  // 获取父任务
+  const { data: parent, error } = await supabase
+    .from('todos')
+    .select('*')
+    .eq('id', parentTodoId)
+    .single();
+  
+  if (error) throw error;
+  if (!parent) throw new Error('Parent todo not found');
+
+  const instances: Todo[] = [];
+  let baseDate = parseISO(parent.date as string);
+
+  for (let i = 0; i < count; i++) {
+    // 计算下一个日期
+    let nextDate: Date;
+    switch (reminderType) {
+      case 'daily':
+        nextDate = addDays(baseDate, customRule?.interval || 1);
+        break;
+      case 'weekly':
+        nextDate = addWeeks(baseDate, customRule?.interval || 1);
+        break;
+      case 'monthly':
+        nextDate = addMonths(baseDate, customRule?.interval || 1);
+        break;
+      default:
+        nextDate = addDays(baseDate, 1);
+    }
+
+    // 检查结束日期
+    if (customRule?.end_date && nextDate > parseISO(customRule.end_date)) {
+      break;
+    }
+
+    // 创建新实例
+    const { data: newTodo, error: insertError } = await supabase
+      .from('todos')
+      .insert({
+        user_id: parent.user_id,
+        list_id: parent.list_id,
+        title: parent.title,
+        description: parent.description,
+        date: format(nextDate, 'yyyy-MM-dd'),
+        priority: parent.priority,
+        completed: false,
+        parent_todo_id: parentTodoId,
+      })
+      .select()
+      .single();
+
+    if (insertError) throw insertError;
+
+    instances.push(newTodo as Todo);
+    baseDate = nextDate;
+  }
+
+  return instances;
+}
+
+export async function handleRecurringComplete(todoId: string): Promise<void> {
+  // 获取当前任务
+  const { data: todo, error } = await supabase
+    .from('todos')
+    .select('*, reminders(*)')
+    .eq('id', todoId)
+    .single();
+  
+  if (error || !todo) return;
+
+  // 如果这是一个重复任务实例，生成下一个周期
+  if (todo.parent_todo_id && todo.reminders?.length > 0) {
+    const reminder = todo.reminders[0];
+    const existingInstances = await supabase
+      .from('todos')
+      .select('id')
+      .eq('parent_todo_id', todo.parent_todo_id)
+      .eq('completed', false);
+
+    // 如果未完成实例少于3个，生成新的
+    if ((existingInstances.data?.length || 0) < 3) {
+      await generateRecurringInstances(
+        todo.parent_todo_id,
+        reminder.type,
+        reminder.custom_rule,
+        3 - (existingInstances.data?.length || 0)
+      );
+    }
+  }
+}
+
+export async function cancelRecurring(parentTodoId: string, deleteFuture: boolean = false): Promise<void> {
+  // 取消重复标记
+  await supabase
+    .from('todos')
+    .update({ is_recurring: false })
+    .eq('id', parentTodoId);
+
+  // 删除未来实例
+  if (deleteFuture) {
+    await supabase
+      .from('todos')
+      .delete()
+      .eq('parent_todo_id', parentTodoId)
+      .eq('completed', false);
   }
 }

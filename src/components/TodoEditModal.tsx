@@ -9,22 +9,24 @@ import {
   Bell,
   Clock,
 } from 'lucide-react';
-import { Todo, TaskList, Priority, Subtask, Reminder } from '../types';
+import { Todo, TaskList, Priority, Subtask, Reminder, Tag } from '../types';
 import { PrioritySelector } from './PrioritySelector';
 import { ListSelector } from './ListSelector';
 import { DatePicker } from './DatePicker';
 import { DescriptionEditor } from './DescriptionEditor';
 import { ReminderModal } from './ReminderModal';
+import { TagSelector } from './TagSelector';
 import { format, parseISO } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
 
 interface TodoEditModalProps {
   todo: Todo | null;
   lists: TaskList[];
+  tags: Tag[];
   reminders: Reminder[];
   isOpen: boolean;
   onClose: () => void;
-  onSave: (todo: Partial<Todo> & { subtasks?: Subtask[] }) => void;
+  onSave: (todo: Partial<Todo> & { subtasks?: Subtask[]; tagIds?: string[] }) => void;
   onDelete?: (id: string) => void;
   onAddSubtask?: (todoId: string, title: string) => void;
   onToggleSubtask?: (todoId: string, subtaskId: string) => void;
@@ -32,23 +34,13 @@ interface TodoEditModalProps {
   onCreateReminder?: (todoId: string, reminder: Omit<Reminder, 'id' | 'user_id' | 'todo_id' | 'created_at'>) => void;
   onUpdateReminder?: (id: string, updates: Partial<Reminder>) => void;
   onDeleteReminder?: (id: string) => void;
-}
-
-interface TodoEditModalProps {
-  todo: Todo | null;
-  lists: TaskList[];
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (todo: Partial<Todo> & { subtasks?: Subtask[] }) => void;
-  onDelete?: (id: string) => void;
-  onAddSubtask?: (todoId: string, title: string) => void;
-  onToggleSubtask?: (todoId: string, subtaskId: string) => void;
-  onDeleteSubtask?: (todoId: string, subtaskId: string) => void;
+  onCreateTag?: (name: string, color: string) => Promise<void>;
 }
 
 export const TodoEditModal: React.FC<TodoEditModalProps> = ({
   todo,
   lists,
+  tags,
   reminders,
   isOpen,
   onClose,
@@ -60,6 +52,7 @@ export const TodoEditModal: React.FC<TodoEditModalProps> = ({
   onCreateReminder,
   onUpdateReminder,
   onDeleteReminder,
+  onCreateTag,
 }) => {
   const [formData, setFormData] = useState({
     title: '',
@@ -67,6 +60,7 @@ export const TodoEditModal: React.FC<TodoEditModalProps> = ({
     list_id: '',
     date: undefined as string | undefined,
     priority: 'medium' as Priority,
+    tagIds: [] as string[],
   });
   const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -81,6 +75,7 @@ export const TodoEditModal: React.FC<TodoEditModalProps> = ({
         list_id: todo.list_id,
         date: todo.date,
         priority: todo.priority,
+        tagIds: todo.tags || [],
       });
     } else {
       // 新建任务默认值
@@ -91,6 +86,7 @@ export const TodoEditModal: React.FC<TodoEditModalProps> = ({
         list_id: defaultList?.id || '',
         date: undefined,
         priority: 'medium',
+        tagIds: [],
       });
     }
   }, [todo, lists, isOpen]);
@@ -222,6 +218,19 @@ export const TodoEditModal: React.FC<TodoEditModalProps> = ({
             value={formData.description}
             onChange={(description) => setFormData({ ...formData, description })}
           />
+
+          {/* 标签选择器 */}
+          {onCreateTag && (
+            <div className="space-y-2">
+              <span className="text-sm text-zinc-500">标签:</span>
+              <TagSelector
+                tags={tags}
+                selectedTagIds={formData.tagIds}
+                onChange={(tagIds) => setFormData({ ...formData, tagIds })}
+                onCreateTag={onCreateTag}
+              />
+            </div>
+          )}
 
           {/* 子任务列表（仅编辑模式） */}
           {!isNew && (

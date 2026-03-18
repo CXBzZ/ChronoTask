@@ -60,6 +60,18 @@ export interface Reminder {
 }
 
 // =============================================
+// Sprint 4: 标签系统类型
+// =============================================
+
+export interface Tag {
+  id: string;
+  user_id: string;
+  name: string;
+  color: string;
+  created_at: string;
+}
+
+// =============================================
 // 任务 (Sprint 1 扩展)
 // =============================================
 
@@ -78,7 +90,10 @@ export interface Todo {
   // Sprint 3+ 预留字段
   reminder_id?: string;
   reminder_at?: string;
-  tags?: string[]; // Sprint 4: tag ids
+  // Sprint 4: 标签和重复任务
+  tags?: string[]; // tag ids
+  parent_todo_id?: string; // 重复任务的父任务ID
+  is_recurring?: boolean; // 是否为重复任务模板
 }
 
 /** Shape used when creating a new Todo */
