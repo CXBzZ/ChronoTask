@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import localforage from 'localforage';
-import { Todo, Subtask, LegacyTodo, TaskList, SmartListType, UserSettings } from './types';
+import { Todo, Subtask, LegacyTodo, TaskList, SmartListType, UserSettings, Reminder } from './types';
 import * as store from './store';
 import { useAuth } from './AuthContext';
 import { supabase } from './lib/supabase';
@@ -11,6 +11,7 @@ interface TodoContextType {
   // 数据
   todos: Todo[];
   lists: TaskList[];
+  reminders: Reminder[];
   isLoading: boolean;
   isMigrating: boolean;
   
@@ -36,6 +37,15 @@ interface TodoContextType {
   updateList: (id: string, updates: Partial<TaskList>) => Promise<void>;
   deleteList: (id: string) => Promise<void>;
   
+  // 提醒
+  createReminder: (todoId: string, reminder: Omit<Reminder, 'id' | 'user_id' | 'todo_id' | 'created_at'>) => Promise<void>;
+  updateReminder: (id: string, updates: Partial<Reminder>) => Promise<void>;
+  deleteReminder: (id: string) => Promise<void>;
+  
+  // 提醒统计
+  dueRemindersCount: number;
+  checkDueReminders: () => Promise<Reminder[]>;
+  
   // 智能清单计数
   smartListCounts: {
     inbox: number;
@@ -51,10 +61,12 @@ export const TodoProvider = ({ children }: { children: ReactNode }) => {
   const { user } = useAuth();
   const [todos, setTodos] = useState<Todo[]>([]);
   const [lists, setLists] = useState<TaskList[]>([]);
+  const [reminders, setReminders] = useState<Reminder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isMigrating, setIsMigrating] = useState(false);
   const [selectedListId, setSelectedListId] = useState<string | SmartListType>('today');
   const [reviewPeriod, setReviewPeriod] = useState<ReviewPeriod>('week');
+  const [dueRemindersCount, setDueRemindersCount] = useState(0);
 
   // 计算智能清单计数
   const smartListCounts = React.useMemo(() => {
@@ -91,6 +103,29 @@ export const TodoProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [user]);
 
+  const reloadReminders = useCallback(async () => {
+    if (!user) return;
+    try {
+      const loadedReminders = await store.loadReminders(user.id);
+      setReminders(loadedReminders);
+    } catch (err) {
+      console.error('Failed to load reminders:', err);
+    }
+  }, [user]);
+
+  // 检查到期提醒
+  const checkDueReminders = useCallback(async () => {
+    if (!user) return [];
+    try {
+      const dueReminders = await store.loadDueReminders(user.id);
+      setDueRemindersCount(dueReminders.length);
+      return dueReminders;
+    } catch (err) {
+      console.error('Failed to check due reminders:', err);
+      return [];
+    }
+  }, [user]);
+
   const migrated = useRef(false);
 
   // 数据迁移
@@ -104,6 +139,7 @@ export const TodoProvider = ({ children }: { children: ReactNode }) => {
       if (settings?.has_migrated_v1) {
         // 已迁移，直接加载数据
         await reload();
+        await reloadReminders();
         return;
       }
 
@@ -133,19 +169,21 @@ export const TodoProvider = ({ children }: { children: ReactNode }) => {
       
       // 重新加载数据
       await reload();
+      await reloadReminders();
       
       setIsMigrating(false);
     } catch (err) {
       console.error('Migration failed:', err);
       setIsMigrating(false);
     }
-  }, [user, reload]);
+  }, [user, reload, reloadReminders]);
 
   // Initial load (with migration)
   useEffect(() => {
     if (!user) {
       setTodos([]);
       setLists([]);
+      setReminders([]);
       setIsLoading(false);
       return;
     }
@@ -169,12 +207,28 @@ export const TodoProvider = ({ children }: { children: ReactNode }) => {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'lists' }, () => {
         reload();
       })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'reminders' }, () => {
+        reloadReminders();
+        checkDueReminders();
+      })
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, reload]);
+  }, [user, reload, reloadReminders, checkDueReminders]);
+
+  // 定期检查到期提醒（每 60 秒）
+  useEffect(() => {
+    if (!user) return;
+
+    checkDueReminders();
+    const interval = setInterval(() => {
+      checkDueReminders();
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, [user, checkDueReminders]);
 
   // Todo 操作
   const addTodo = useCallback(async (todo: { title: string; list_id: string; date?: string; priority: Todo['priority'] }) => {
@@ -315,11 +369,73 @@ export const TodoProvider = ({ children }: { children: ReactNode }) => {
     return result;
   }, [lists, selectedListId]);
 
+  // 提醒操作
+  const createReminder = useCallback(async (
+    todoId: string,
+    reminder: Omit<Reminder, 'id' | 'user_id' | 'todo_id' | 'created_at'>
+  ) => {
+    if (!user) return;
+    const created = await store.createReminder({
+      ...reminder,
+      todo_id: todoId,
+      user_id: user.id,
+    });
+    setReminders((prev) => [...prev, created]);
+    
+    // 更新 todo 的冗余字段
+    setTodos((prev) =>
+      prev.map((t) =>
+        t.id === todoId
+          ? { ...t, reminder_id: created.id, reminder_at: reminder.reminder_at }
+          : t
+      )
+    );
+  }, [user]);
+
+  const updateReminder = useCallback(async (id: string, updates: Partial<Reminder>) => {
+    setReminders((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, ...updates } : r))
+    );
+    await store.updateReminder(id, updates);
+    
+    // 同步更新 todo 的冗余字段
+    if (updates.reminder_at || updates.is_enabled === false) {
+      const reminder = reminders.find((r) => r.id === id);
+      if (reminder) {
+        setTodos((prev) =>
+          prev.map((t) =>
+            t.id === reminder.todo_id
+              ? { ...t, reminder_at: updates.is_enabled === false ? undefined : updates.reminder_at || t.reminder_at }
+              : t
+          )
+        );
+      }
+    }
+  }, [reminders]);
+
+  const deleteReminder = useCallback(async (id: string) => {
+    const reminder = reminders.find((r) => r.id === id);
+    setReminders((prev) => prev.filter((r) => r.id !== id));
+    await store.deleteReminder(id);
+    
+    // 清除 todo 的冗余字段
+    if (reminder) {
+      setTodos((prev) =>
+        prev.map((t) =>
+          t.id === reminder.todo_id
+            ? { ...t, reminder_id: undefined, reminder_at: undefined }
+            : t
+        )
+      );
+    }
+  }, [reminders]);
+
   return (
     <TodoContext.Provider
       value={{
         todos,
         lists,
+        reminders,
         isLoading,
         isMigrating,
         selectedListId,
@@ -336,6 +452,11 @@ export const TodoProvider = ({ children }: { children: ReactNode }) => {
         createList,
         updateList,
         deleteList,
+        createReminder,
+        updateReminder,
+        deleteReminder,
+        dueRemindersCount,
+        checkDueReminders,
         smartListCounts,
       }}
     >

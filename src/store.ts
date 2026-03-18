@@ -1,5 +1,5 @@
 import { supabase } from './lib/supabase';
-import { Todo, Subtask, TaskList, UserSettings } from './types';
+import { Todo, Subtask, TaskList, UserSettings, Reminder, ReminderType } from './types';
 
 /** Assemble Todo objects from separate todos + subtasks rows */
 function assembleTodos(
@@ -313,5 +313,114 @@ export async function updateListOrder(listIds: string[]): Promise<void> {
       .eq('id', update.id);
 
     if (error) throw error;
+  }
+}
+
+// =============================================
+// Sprint 3: Reminders APIs
+// =============================================
+
+export async function loadReminders(userId: string): Promise<Reminder[]> {
+  const { data, error } = await supabase
+    .from('reminders')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('is_enabled', true)
+    .order('reminder_at');
+
+  if (error) throw error;
+  return (data || []) as Reminder[];
+}
+
+export async function loadUpcomingReminders(userId: string, limit: number = 10): Promise<Reminder[]> {
+  const { data, error } = await supabase
+    .from('reminders')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('is_enabled', true)
+    .gte('reminder_at', new Date().toISOString())
+    .order('reminder_at')
+    .limit(limit);
+
+  if (error) throw error;
+  return (data || []) as Reminder[];
+}
+
+export async function loadDueReminders(userId: string): Promise<Reminder[]> {
+  const { data, error } = await supabase
+    .from('reminders')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('is_enabled', true)
+    .lte('reminder_at', new Date().toISOString())
+    .order('reminder_at');
+
+  if (error) throw error;
+  return (data || []) as Reminder[];
+}
+
+export async function createReminder(
+  reminder: Omit<Reminder, 'id' | 'user_id' | 'todo_id' | 'created_at'> & { todo_id: string; user_id: string }
+): Promise<Reminder> {
+  const { data, error } = await supabase
+    .from('reminders')
+    .insert(reminder)
+    .select()
+    .single();
+
+  if (error) throw error;
+
+  // 更新 todos 表的冗余字段
+  await supabase
+    .from('todos')
+    .update({
+      reminder_id: data.id,
+      reminder_at: reminder.reminder_at,
+    })
+    .eq('id', reminder.todo_id);
+
+  return data as Reminder;
+}
+
+export async function updateReminder(id: string, updates: Partial<Reminder>): Promise<void> {
+  const { error } = await supabase.from('reminders').update(updates).eq('id', id);
+  if (error) throw error;
+
+  // 如果更新了 reminder_at，同步更新 todos 表
+  if (updates.reminder_at) {
+    const { data } = await supabase.from('reminders').select('todo_id').eq('id', id).single();
+    if (data?.todo_id) {
+      await supabase
+        .from('todos')
+        .update({ reminder_at: updates.reminder_at })
+        .eq('id', data.todo_id);
+    }
+  }
+
+  // 如果禁用了提醒，清除 todos 表的冗余字段
+  if (updates.is_enabled === false) {
+    const { data } = await supabase.from('reminders').select('todo_id').eq('id', id).single();
+    if (data?.todo_id) {
+      await supabase
+        .from('todos')
+        .update({ reminder_at: null, reminder_id: null })
+        .eq('id', data.todo_id);
+    }
+  }
+}
+
+export async function deleteReminder(id: string): Promise<void> {
+  // 先获取 todo_id 以清除冗余字段
+  const { data } = await supabase.from('reminders').select('todo_id').eq('id', id).single();
+  
+  const { error } = await supabase.from('reminders').delete().eq('id', id);
+  if (error) throw error;
+
+  // 清除 todos 表的冗余字段
+  if (data?.todo_id) {
+    await supabase
+      .from('todos')
+      .update({ reminder_at: null, reminder_id: null })
+      .eq('id', data.todo_id);
   }
 }

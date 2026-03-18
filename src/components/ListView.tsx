@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Plus, CheckSquare, Flag, ListTodo, X, Search, Calendar, MoreHorizontal, Edit2 } from 'lucide-react';
-import { Todo, Priority, TaskList, SmartListType } from '../types';
+import { Todo, Priority, TaskList, SmartListType, Reminder } from '../types';
 import { format, parseISO, isSameDay, differenceInDays } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
 import { TodoEditModal } from './TodoEditModal';
@@ -9,6 +9,7 @@ interface ListViewProps {
   selectedListId: string | SmartListType;
   lists: TaskList[];
   todos: Todo[];
+  reminders: Reminder[];
   isLoading: boolean;
   onAddTodo: (todo: { title: string; list_id: string; date?: string; priority: Priority }) => void;
   onUpdateTodo: (id: string, updates: Partial<Todo>) => void;
@@ -17,6 +18,9 @@ interface ListViewProps {
   onAddSubtask: (todoId: string, title: string) => void;
   onToggleSubtask: (todoId: string, subtaskId: string) => void;
   onDeleteSubtask: (todoId: string, subtaskId: string) => void;
+  onCreateReminder?: (todoId: string, reminder: Omit<Reminder, 'id' | 'user_id' | 'todo_id' | 'created_at'>) => void;
+  onUpdateReminder?: (id: string, updates: Partial<Reminder>) => void;
+  onDeleteReminder?: (id: string) => void;
 }
 
 const priorityOrder = { high: 3, medium: 2, low: 1 };
@@ -31,6 +35,7 @@ export const ListView: React.FC<ListViewProps> = ({
   selectedListId,
   lists,
   todos,
+  reminders,
   isLoading,
   onAddTodo,
   onUpdateTodo,
@@ -39,6 +44,9 @@ export const ListView: React.FC<ListViewProps> = ({
   onAddSubtask,
   onToggleSubtask,
   onDeleteSubtask,
+  onCreateReminder,
+  onUpdateReminder,
+  onDeleteReminder,
 }) => {
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [newTaskPriority, setNewTaskPriority] = useState<Priority>('medium');
@@ -481,6 +489,7 @@ export const ListView: React.FC<ListViewProps> = ({
       <TodoEditModal
         todo={editingTodo}
         lists={lists}
+        reminders={reminders}
         isOpen={isEditModalOpen}
         onClose={handleCloseEditModal}
         onSave={handleSaveTodo}
@@ -488,6 +497,9 @@ export const ListView: React.FC<ListViewProps> = ({
         onAddSubtask={onAddSubtask}
         onToggleSubtask={onToggleSubtask}
         onDeleteSubtask={onDeleteSubtask}
+        onCreateReminder={onCreateReminder}
+        onUpdateReminder={onUpdateReminder}
+        onDeleteReminder={onDeleteReminder}
       />
     </>
   );

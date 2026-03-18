@@ -11,6 +11,7 @@ export const Layout = () => {
   const {
     todos,
     lists,
+    reminders,
     isLoading,
     isMigrating,
     selectedListId,
@@ -25,6 +26,9 @@ export const Layout = () => {
     createList,
     updateList,
     deleteList,
+    createReminder,
+    updateReminder,
+    deleteReminder,
     smartListCounts,
     reviewPeriod,
     setReviewPeriod,
@@ -109,6 +113,7 @@ export const Layout = () => {
               selectedListId={selectedListId}
               lists={lists}
               todos={todos}
+              reminders={reminders}
               isLoading={isLoading}
               onAddTodo={addTodo}
               onUpdateTodo={updateTodo}
@@ -117,6 +122,9 @@ export const Layout = () => {
               onAddSubtask={addSubtask}
               onToggleSubtask={toggleSubtask}
               onDeleteSubtask={deleteSubtask}
+              onCreateReminder={createReminder}
+              onUpdateReminder={updateReminder}
+              onDeleteReminder={deleteReminder}
             />
           ) : (
             <ReviewView />

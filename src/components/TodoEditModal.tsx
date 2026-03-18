@@ -6,12 +6,33 @@ import {
   Plus,
   Image as ImageIcon,
   AlertCircle,
+  Bell,
+  Clock,
 } from 'lucide-react';
-import { Todo, TaskList, Priority, Subtask } from '../types';
+import { Todo, TaskList, Priority, Subtask, Reminder } from '../types';
 import { PrioritySelector } from './PrioritySelector';
 import { ListSelector } from './ListSelector';
 import { DatePicker } from './DatePicker';
 import { DescriptionEditor } from './DescriptionEditor';
+import { ReminderModal } from './ReminderModal';
+import { format, parseISO } from 'date-fns';
+import { zhCN } from 'date-fns/locale';
+
+interface TodoEditModalProps {
+  todo: Todo | null;
+  lists: TaskList[];
+  reminders: Reminder[];
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (todo: Partial<Todo> & { subtasks?: Subtask[] }) => void;
+  onDelete?: (id: string) => void;
+  onAddSubtask?: (todoId: string, title: string) => void;
+  onToggleSubtask?: (todoId: string, subtaskId: string) => void;
+  onDeleteSubtask?: (todoId: string, subtaskId: string) => void;
+  onCreateReminder?: (todoId: string, reminder: Omit<Reminder, 'id' | 'user_id' | 'todo_id' | 'created_at'>) => void;
+  onUpdateReminder?: (id: string, updates: Partial<Reminder>) => void;
+  onDeleteReminder?: (id: string) => void;
+}
 
 interface TodoEditModalProps {
   todo: Todo | null;
@@ -28,6 +49,7 @@ interface TodoEditModalProps {
 export const TodoEditModal: React.FC<TodoEditModalProps> = ({
   todo,
   lists,
+  reminders,
   isOpen,
   onClose,
   onSave,
@@ -35,6 +57,9 @@ export const TodoEditModal: React.FC<TodoEditModalProps> = ({
   onAddSubtask,
   onToggleSubtask,
   onDeleteSubtask,
+  onCreateReminder,
+  onUpdateReminder,
+  onDeleteReminder,
 }) => {
   const [formData, setFormData] = useState({
     title: '',
@@ -45,6 +70,7 @@ export const TodoEditModal: React.FC<TodoEditModalProps> = ({
   });
   const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
 
   // 初始化表单数据
   useEffect(() => {
@@ -261,6 +287,50 @@ export const TodoEditModal: React.FC<TodoEditModalProps> = ({
             </div>
           )}
 
+          {/* 提醒设置 */}
+          {!isNew && todo && (
+            <div className="border border-zinc-200 rounded-xl overflow-hidden">
+              <div className="px-4 py-3 bg-zinc-50 border-b border-zinc-200 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Bell className="w-4 h-4 text-zinc-400" />
+                  <span className="text-sm font-medium text-zinc-700">提醒</span>
+                </div>
+                <button
+                  onClick={() => setIsReminderModalOpen(true)}
+                  className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                >
+                  {todo.reminder_id ? '修改' : '设置'}
+                </button>
+              </div>
+
+              <div className="p-4">
+                {todo.reminder_id && reminders ? (
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 text-sm text-zinc-700">
+                      <Clock className="w-4 h-4 text-indigo-500" />
+                      <span>
+                        {todo.reminder_at && format(parseISO(todo.reminder_at), 'M月d日 HH:mm', { locale: zhCN })}
+                      </span>
+                    </div>
+                    <span className="text-xs px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded-full">
+                      {reminders.find((r) => r.id === todo.reminder_id)?.type === 'once'
+                        ? '仅一次'
+                        : reminders.find((r) => r.id === todo.reminder_id)?.type === 'daily'
+                        ? '每天'
+                        : reminders.find((r) => r.id === todo.reminder_id)?.type === 'weekly'
+                        ? '每周'
+                        : reminders.find((r) => r.id === todo.reminder_id)?.type === 'monthly'
+                        ? '每月'
+                        : '自定义'}
+                    </span>
+                  </div>
+                ) : (
+                  <p className="text-sm text-zinc-400">暂无提醒</p>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* 图片预览 */}
           {todo?.image && (
             <div className="border border-zinc-200 rounded-xl overflow-hidden">
@@ -303,6 +373,31 @@ export const TodoEditModal: React.FC<TodoEditModalProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Reminder Modal */}
+      {!isNew && todo && (
+        <ReminderModal
+          todoId={todo.id}
+          todoTitle={todo.title}
+          existingReminder={reminders?.find((r) => r.id === todo.reminder_id)}
+          isOpen={isReminderModalOpen}
+          onClose={() => setIsReminderModalOpen(false)}
+          onSave={(reminderData) => {
+            const existing = reminders?.find((r) => r.id === todo.reminder_id);
+            if (existing && onUpdateReminder) {
+              onUpdateReminder(existing.id, reminderData);
+            } else if (onCreateReminder) {
+              onCreateReminder(todo.id, reminderData);
+            }
+          }}
+          onDelete={() => {
+            const existing = reminders?.find((r) => r.id === todo.reminder_id);
+            if (existing && onDeleteReminder) {
+              onDeleteReminder(existing.id);
+            }
+          }}
+        />
+      )}
     </div>
   );
 };

@@ -37,6 +37,29 @@ export interface Subtask {
 }
 
 // =============================================
+// Sprint 3: 提醒系统类型
+// =============================================
+
+export type ReminderType = 'once' | 'daily' | 'weekly' | 'monthly' | 'custom';
+
+export interface Reminder {
+  id: string;
+  todo_id: string;
+  user_id: string;
+  reminder_at: string; // ISO 8601
+  type: ReminderType;
+  custom_rule?: {
+    interval: number;
+    end_date?: string;
+    days_of_week?: number[]; // 1=周一, 7=周日
+  };
+  is_enabled: boolean;
+  is_recurring: boolean;
+  parent_todo_id?: string;
+  created_at: string;
+}
+
+// =============================================
 // 任务 (Sprint 1 扩展)
 // =============================================
 
