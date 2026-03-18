@@ -1,5 +1,5 @@
 import { supabase } from './lib/supabase';
-import { Todo, Subtask, TaskList, UserSettings, Reminder, ReminderType, Tag } from './types';
+import { Todo, Subtask, TaskList, UserSettings, Reminder, ReminderType, Tag, FocusSession, FocusType } from './types';
 import { format, addDays, addWeeks, addMonths, parseISO } from 'date-fns';
 
 /** Assemble Todo objects from separate todos + subtasks rows */
@@ -635,4 +635,77 @@ export async function cancelRecurring(parentTodoId: string, deleteFuture: boolea
       .eq('parent_todo_id', parentTodoId)
       .eq('completed', false);
   }
+}
+
+// =============================================
+// Sprint 5: Focus APIs
+// =============================================
+
+export async function startFocus(session: Omit<FocusSession, 'id' | 'created_at'>): Promise<FocusSession> {
+  const { data, error } = await supabase
+    .from('focus_sessions')
+    .insert(session)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data as FocusSession;
+}
+
+export async function endFocus(id: string, updates: Partial<FocusSession>): Promise<void> {
+  const { error } = await supabase
+    .from('focus_sessions')
+    .update(updates)
+    .eq('id', id);
+
+  if (error) throw error;
+}
+
+export async function loadFocusSessions(userId: string, limit: number = 50): Promise<FocusSession[]> {
+  const { data, error } = await supabase
+    .from('focus_sessions')
+    .select('*')
+    .eq('user_id', userId)
+    .order('started_at', { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+  return (data || []) as FocusSession[];
+}
+
+export async function loadFocusStats(userId: string, period: 'today' | 'week' | 'month'): Promise<{
+  total_sessions: number;
+  total_duration: number;
+  completed_sessions: number;
+}> {
+  let startDate: string;
+  const now = new Date();
+
+  switch (period) {
+    case 'today':
+      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+      break;
+    case 'week':
+      startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      break;
+    case 'month':
+      startDate = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate()).toISOString();
+      break;
+  }
+
+  const { data, error } = await supabase
+    .from('focus_sessions')
+    .select('duration, is_completed')
+    .eq('user_id', userId)
+    .gte('started_at', startDate)
+    .eq('type', 'focus');
+
+  if (error) throw error;
+
+  const sessions = data || [];
+  return {
+    total_sessions: sessions.length,
+    total_duration: sessions.reduce((sum, s) => sum + (s.duration || 0), 0) / 60, // 转换为分钟
+    completed_sessions: sessions.filter((s) => s.is_completed).length,
+  };
 }

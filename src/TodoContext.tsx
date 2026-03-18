@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import localforage from 'localforage';
-import { Todo, Subtask, LegacyTodo, TaskList, SmartListType, UserSettings, Reminder } from './types';
+import { Todo, Subtask, LegacyTodo, TaskList, SmartListType, UserSettings, Reminder, Tag, FocusSession, FocusType } from './types';
 import * as store from './store';
 import { useAuth } from './AuthContext';
 import { supabase } from './lib/supabase';
@@ -14,38 +14,48 @@ interface TodoContextType {
   reminders: Reminder[];
   isLoading: boolean;
   isMigrating: boolean;
-  
+
   // 视图状态
   selectedListId: string | SmartListType;
   setSelectedListId: (id: string | SmartListType) => void;
   reviewPeriod: ReviewPeriod;
   setReviewPeriod: (period: ReviewPeriod) => void;
-  
+
   // Todo 操作
   addTodo: (todo: { title: string; list_id: string; date?: string; priority: Todo['priority'] }) => Promise<void>;
   updateTodo: (id: string, updates: Partial<Todo>) => Promise<void>;
   deleteTodo: (id: string) => Promise<void>;
   toggleComplete: (id: string) => Promise<void>;
-  
+
   // 子任务
   addSubtask: (todoId: string, title: string) => Promise<void>;
   toggleSubtask: (todoId: string, subtaskId: string) => Promise<void>;
   deleteSubtask: (todoId: string, subtaskId: string) => Promise<void>;
-  
+
   // 清单
   createList: (name: string, icon?: string, color?: string) => Promise<void>;
   updateList: (id: string, updates: Partial<TaskList>) => Promise<void>;
   deleteList: (id: string) => Promise<void>;
-  
+
   // 提醒
   createReminder: (todoId: string, reminder: Omit<Reminder, 'id' | 'user_id' | 'todo_id' | 'created_at'>) => Promise<void>;
   updateReminder: (id: string, updates: Partial<Reminder>) => Promise<void>;
   deleteReminder: (id: string) => Promise<void>;
-  
+
   // 提醒统计
   dueRemindersCount: number;
   checkDueReminders: () => Promise<Reminder[]>;
-  
+
+  // 专注
+  focusSessions: FocusSession[];
+  startFocus: (session: Omit<FocusSession, 'id' | 'user_id' | 'created_at'>) => Promise<FocusSession>;
+  endFocus: (id: string, updates: Partial<FocusSession>) => Promise<void>;
+  loadFocusStats: (period: 'today' | 'week' | 'month') => Promise<{
+    total_sessions: number;
+    total_duration: number;
+    completed_sessions: number;
+  }>;
+
   // 智能清单计数
   smartListCounts: {
     inbox: number;
@@ -62,6 +72,7 @@ export const TodoProvider = ({ children }: { children: ReactNode }) => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [lists, setLists] = useState<TaskList[]>([]);
   const [reminders, setReminders] = useState<Reminder[]>([]);
+  const [focusSessions, setFocusSessions] = useState<FocusSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isMigrating, setIsMigrating] = useState(false);
   const [selectedListId, setSelectedListId] = useState<string | SmartListType>('today');
@@ -72,7 +83,7 @@ export const TodoProvider = ({ children }: { children: ReactNode }) => {
   const smartListCounts = React.useMemo(() => {
     const today = new Date().toISOString().split('T')[0];
     const now = new Date();
-    
+
     return {
       inbox: todos.filter((t) => !t.date).length,
       today: todos.filter((t) => t.date === today).length,
@@ -148,7 +159,7 @@ export const TodoProvider = ({ children }: { children: ReactNode }) => {
       // 先迁移 legacy localforage 数据
       const LEGACY_KEY = 'chronotask-todos';
       const legacy = await localforage.getItem<LegacyTodo[]>(LEGACY_KEY);
-      
+
       if (legacy?.length) {
         for (const item of legacy) {
           await supabase.from('todos').insert({
@@ -166,11 +177,11 @@ export const TodoProvider = ({ children }: { children: ReactNode }) => {
 
       // 执行清单系统迁移
       await store.migrateUserData(user.id);
-      
+
       // 重新加载数据
       await reload();
       await reloadReminders();
-      
+
       setIsMigrating(false);
     } catch (err) {
       console.error('Migration failed:', err);
@@ -187,7 +198,7 @@ export const TodoProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(false);
       return;
     }
-    
+
     setIsLoading(true);
     migrateData().finally(() => setIsLoading(false));
   }, [user, migrateData]);
@@ -352,7 +363,7 @@ export const TodoProvider = ({ children }: { children: ReactNode }) => {
   const deleteList = useCallback(async (id: string) => {
     const result = await store.deleteList(id);
     setLists((prev) => prev.filter((l) => l.id !== id));
-    
+
     // 将相关任务的 list_id 更新为收件箱
     const inboxList = lists.find((l) => l.name === '收件箱');
     if (inboxList) {
@@ -360,12 +371,12 @@ export const TodoProvider = ({ children }: { children: ReactNode }) => {
         prev.map((t) => (t.list_id === id ? { ...t, list_id: inboxList.id } : t))
       );
     }
-    
+
     // 如果当前选中的是被删除的清单，切换到「今天」
     if (selectedListId === id) {
       setSelectedListId('today');
     }
-    
+
     return result;
   }, [lists, selectedListId]);
 
@@ -381,7 +392,7 @@ export const TodoProvider = ({ children }: { children: ReactNode }) => {
       user_id: user.id,
     });
     setReminders((prev) => [...prev, created]);
-    
+
     // 更新 todo 的冗余字段
     setTodos((prev) =>
       prev.map((t) =>
@@ -397,7 +408,7 @@ export const TodoProvider = ({ children }: { children: ReactNode }) => {
       prev.map((r) => (r.id === id ? { ...r, ...updates } : r))
     );
     await store.updateReminder(id, updates);
-    
+
     // 同步更新 todo 的冗余字段
     if (updates.reminder_at || updates.is_enabled === false) {
       const reminder = reminders.find((r) => r.id === id);
@@ -430,12 +441,36 @@ export const TodoProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [reminders]);
 
+  // 专注操作
+  const startFocus = useCallback(async (session: Omit<FocusSession, 'id' | 'user_id' | 'created_at'>) => {
+    if (!user) throw new Error('User not authenticated');
+    const created = await store.startFocus({
+      ...session,
+      user_id: user.id,
+    });
+    setFocusSessions((prev) => [created, ...prev]);
+    return created;
+  }, [user]);
+
+  const endFocus = useCallback(async (id: string, updates: Partial<FocusSession>) => {
+    await store.endFocus(id, updates);
+    setFocusSessions((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, ...updates } : s))
+    );
+  }, []);
+
+  const loadFocusStats = useCallback(async (period: 'today' | 'week' | 'month') => {
+    if (!user) return { total_sessions: 0, total_duration: 0, completed_sessions: 0 };
+    return await store.loadFocusStats(user.id, period);
+  }, [user]);
+
   return (
     <TodoContext.Provider
       value={{
         todos,
         lists,
         reminders,
+        focusSessions,
         isLoading,
         isMigrating,
         selectedListId,
@@ -457,6 +492,9 @@ export const TodoProvider = ({ children }: { children: ReactNode }) => {
         deleteReminder,
         dueRemindersCount,
         checkDueReminders,
+        startFocus,
+        endFocus,
+        loadFocusStats,
         smartListCounts,
       }}
     >

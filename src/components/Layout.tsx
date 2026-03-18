@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
-import { LogOut, LayoutList, BarChart3 } from 'lucide-react';
+import { LogOut, LayoutList, BarChart3, Calendar, Target } from 'lucide-react';
 import { ListSidebar } from './ListSidebar';
 import { ListView } from './ListView';
 import { ReviewView } from './ReviewView';
+import { FocusView } from './FocusView';
+import { MonthView } from './MonthView';
 import { useTodos } from '../TodoContext';
 import { useAuth } from '../AuthContext';
 
 export const Layout = () => {
-  const [activeTab, setActiveTab] = useState<'list' | 'review'>('list');
+  const [activeTab, setActiveTab] = useState<'list' | 'month' | 'focus' | 'review'>('list');
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const {
     todos,
     lists,
@@ -29,6 +32,9 @@ export const Layout = () => {
     createReminder,
     updateReminder,
     deleteReminder,
+    startFocus,
+    endFocus,
+    loadFocusStats,
     smartListCounts,
     reviewPeriod,
     setReviewPeriod,
@@ -74,7 +80,29 @@ export const Layout = () => {
               }`}
             >
               <LayoutList className="w-4 h-4" />
-              任务
+              清单
+            </button>
+            <button
+              onClick={() => setActiveTab('month')}
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                activeTab === 'month'
+                  ? 'bg-white text-indigo-700 shadow-sm'
+                  : 'text-zinc-600 hover:text-zinc-900'
+              }`}
+            >
+              <Calendar className="w-4 h-4" />
+              月视图
+            </button>
+            <button
+              onClick={() => setActiveTab('focus')}
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                activeTab === 'focus'
+                  ? 'bg-white text-indigo-700 shadow-sm'
+                  : 'text-zinc-600 hover:text-zinc-900'
+              }`}
+            >
+              <Target className="w-4 h-4" />
+              专注
             </button>
             <button
               onClick={() => setActiveTab('review')}
@@ -108,7 +136,7 @@ export const Layout = () => {
 
         {/* Content Area */}
         <main className="flex-1 overflow-hidden">
-          {activeTab === 'list' ? (
+          {activeTab === 'list' && (
             <ListView
               selectedListId={selectedListId}
               lists={lists}
@@ -126,9 +154,31 @@ export const Layout = () => {
               onUpdateReminder={updateReminder}
               onDeleteReminder={deleteReminder}
             />
-          ) : (
-            <ReviewView />
           )}
+          {activeTab === 'month' && (
+            <MonthView
+              todos={todos}
+              lists={lists}
+              selectedDate={selectedDate}
+              onSelectDate={(date) => {
+                setSelectedDate(date);
+                setActiveTab('list');
+              }}
+              onAddTodo={(date) => {
+                // 可以在这里打开添加任务的弹窗
+                console.log('Add todo for date:', date);
+              }}
+            />
+          )}
+          {activeTab === 'focus' && (
+            <FocusView
+              todos={todos}
+              onStartFocus={startFocus}
+              onEndFocus={endFocus}
+              onLoadFocusStats={loadFocusStats}
+            />
+          )}
+          {activeTab === 'review' && <ReviewView />}
         </main>
       </div>
     </div>

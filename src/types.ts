@@ -115,6 +115,25 @@ export interface LegacyTodo {
 }
 
 // =============================================
+// Sprint 5: 专注系统类型
+// =============================================
+
+export type FocusType = 'focus' | 'short_break' | 'long_break';
+
+export interface FocusSession {
+  id: string;
+  user_id: string;
+  todo_id?: string;
+  started_at: string;
+  ended_at?: string;
+  duration: number; // 秒
+  actual_duration: number; // 秒
+  is_completed: boolean;
+  type: FocusType;
+  created_at: string;
+}
+
+// =============================================
 // UI 状态类型
 // =============================================
 
