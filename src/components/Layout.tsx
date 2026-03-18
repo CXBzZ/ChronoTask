@@ -64,6 +64,8 @@ export const Layout = () => {
         onCreateList={createList}
         onUpdateList={updateList}
         onDeleteList={deleteList}
+        userEmail={user?.email}
+        onSignOut={signOut}
       />
 
       {/* Main Content */}

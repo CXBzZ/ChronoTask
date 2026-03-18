@@ -12,6 +12,7 @@ import {
   Settings,
 } from 'lucide-react';
 import { TaskList, SmartListType } from '../types';
+import { SettingsModal } from './SettingsModal';
 
 interface SmartListCounts {
   inbox: number;
@@ -28,6 +29,8 @@ interface ListSidebarProps {
   onCreateList: (name: string, icon?: string, color?: string) => Promise<void>;
   onUpdateList: (id: string, updates: Partial<TaskList>) => Promise<void>;
   onDeleteList: (id: string) => Promise<void>;
+  userEmail?: string;
+  onSignOut?: () => void;
 }
 
 const SMART_LIST_ICONS: Record<SmartListType, React.ReactNode> = {
@@ -63,11 +66,14 @@ export const ListSidebar: React.FC<ListSidebarProps> = ({
   onCreateList,
   onUpdateList,
   onDeleteList,
+  userEmail,
+  onSignOut,
 }) => {
   const [isCreating, setIsCreating] = useState(false);
   const [newListName, setNewListName] = useState('');
   const [editingList, setEditingList] = useState<TaskList | null>(null);
   const [editName, setEditName] = useState('');
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const customLists = lists.filter((l) => !l.is_default);
 
@@ -263,11 +269,22 @@ export const ListSidebar: React.FC<ListSidebarProps> = ({
 
       {/* Footer */}
       <div className="p-4 border-t border-zinc-100">
-        <button className="flex items-center gap-3 px-3 py-2 w-full text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 rounded-xl transition-colors">
+        <button
+          onClick={() => setIsSettingsOpen(true)}
+          className="flex items-center gap-3 px-3 py-2 w-full text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 rounded-xl transition-colors"
+        >
           <Settings className="w-5 h-5" />
           设置
         </button>
       </div>
+
+      {/* Settings Modal */}
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        userEmail={userEmail}
+        onSignOut={onSignOut || (() => {})}
+      />
     </div>
   );
 };
