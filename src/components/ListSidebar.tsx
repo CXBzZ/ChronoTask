@@ -8,6 +8,7 @@ import {
   Trash2,
   Edit2,
   Settings,
+  X,
 } from 'lucide-react';
 import { TaskList, SmartListType } from '../types';
 import { SettingsModal } from './SettingsModal';
@@ -29,6 +30,7 @@ interface ListSidebarProps {
   onDeleteList: (id: string) => Promise<void>;
   userEmail?: string;
   onSignOut?: () => void;
+  onClose?: () => void;
 }
 
 const SMART_LIST_ICONS: Record<SmartListType, React.ReactNode> = {
@@ -66,6 +68,7 @@ export const ListSidebar: React.FC<ListSidebarProps> = ({
   onDeleteList,
   userEmail,
   onSignOut,
+  onClose,
 }) => {
   const [isCreating, setIsCreating] = useState(false);
   const [newListName, setNewListName] = useState('');
@@ -133,13 +136,21 @@ export const ListSidebar: React.FC<ListSidebarProps> = ({
   return (
     <div className="h-full flex flex-col bg-white dark:bg-zinc-800 border-r border-zinc-200 dark:border-zinc-700 w-64">
       {/* Header */}
-      <div className="p-4 border-b border-zinc-100 dark:border-zinc-700">
+      <div className="p-4 border-b border-zinc-100 dark:border-zinc-700 flex items-center justify-between">
         <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
           <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center">
             <CheckCircle2 className="w-5 h-5 text-white" />
           </div>
           ChronoTask
         </h1>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="md:hidden p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
       </div>
 
       {/* Scrollable Content */}

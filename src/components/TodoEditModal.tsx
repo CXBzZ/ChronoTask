@@ -139,10 +139,10 @@ export const TodoEditModal: React.FC<TodoEditModalProps> = ({
       />
 
       {/* 弹窗内容 */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="relative bg-white dark:bg-zinc-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         {/* 头部 */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
-          <h2 className="text-lg font-semibold text-zinc-900">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100 dark:border-zinc-700">
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
             {isNew ? '新建任务' : '编辑任务'}
           </h2>
           <div className="flex items-center gap-2">
@@ -154,7 +154,7 @@ export const TodoEditModal: React.FC<TodoEditModalProps> = ({
                     onClose();
                   }
                 }}
-                className="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                className="p-2 text-zinc-400 dark:text-zinc-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
                 title="删除任务"
               >
                 <Trash2 className="w-5 h-5" />
@@ -162,7 +162,7 @@ export const TodoEditModal: React.FC<TodoEditModalProps> = ({
             )}
             <button
               onClick={onClose}
-              className="p-2 text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 rounded-lg transition-colors"
+              className="p-2 text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded-lg transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -178,7 +178,7 @@ export const TodoEditModal: React.FC<TodoEditModalProps> = ({
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               placeholder="任务标题"
-              className="w-full text-xl font-semibold text-zinc-900 placeholder:text-zinc-300 border-0 focus:outline-none focus:ring-0 p-0"
+              className="w-full text-xl font-semibold text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-300 dark:placeholder:text-zinc-600 border-0 focus:outline-none focus:ring-0 p-0 bg-transparent"
               autoFocus
             />
           </div>
@@ -186,7 +186,7 @@ export const TodoEditModal: React.FC<TodoEditModalProps> = ({
           {/* 属性选择行 */}
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex items-center gap-2">
-              <span className="text-sm text-zinc-500">清单:</span>
+              <span className="text-sm text-zinc-500 dark:text-zinc-400">清单:</span>
               <ListSelector
                 lists={lists}
                 value={formData.list_id}
@@ -195,7 +195,7 @@ export const TodoEditModal: React.FC<TodoEditModalProps> = ({
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-sm text-zinc-500">日期:</span>
+              <span className="text-sm text-zinc-500 dark:text-zinc-400">日期:</span>
               <DatePicker
                 value={formData.date}
                 onChange={(date) => setFormData({ ...formData, date })}
@@ -205,7 +205,7 @@ export const TodoEditModal: React.FC<TodoEditModalProps> = ({
 
           {/* 优先级 */}
           <div className="flex items-center gap-4">
-            <span className="text-sm text-zinc-500">优先级:</span>
+            <span className="text-sm text-zinc-500 dark:text-zinc-400">优先级:</span>
             <PrioritySelector
               value={formData.priority}
               onChange={(priority) => setFormData({ ...formData, priority })}
@@ -222,7 +222,7 @@ export const TodoEditModal: React.FC<TodoEditModalProps> = ({
           {/* 标签选择器 */}
           {onCreateTag && (
             <div className="space-y-2">
-              <span className="text-sm text-zinc-500">标签:</span>
+              <span className="text-sm text-zinc-500 dark:text-zinc-400">标签:</span>
               <TagSelector
                 tags={tags}
                 selectedTagIds={formData.tagIds}
@@ -234,11 +234,11 @@ export const TodoEditModal: React.FC<TodoEditModalProps> = ({
 
           {/* 子任务列表（仅编辑模式） */}
           {!isNew && (
-            <div className="border border-zinc-200 rounded-xl overflow-hidden">
-              <div className="px-4 py-3 bg-zinc-50 border-b border-zinc-200 flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-zinc-400" />
-                <span className="text-sm font-medium text-zinc-700">子任务</span>
-                <span className="text-xs text-zinc-400">
+            <div className="border border-zinc-200 dark:border-zinc-700 rounded-xl overflow-hidden">
+              <div className="px-4 py-3 bg-zinc-50 dark:bg-zinc-700/50 border-b border-zinc-200 dark:border-zinc-700 flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-zinc-400 dark:text-zinc-500" />
+                <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">子任务</span>
+                <span className="text-xs text-zinc-400 dark:text-zinc-500">
                   ({subtasks.filter((s) => s.completed).length}/{subtasks.length})
                 </span>
               </div>
@@ -254,7 +254,7 @@ export const TodoEditModal: React.FC<TodoEditModalProps> = ({
                       className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
                         subtask.completed
                           ? 'bg-indigo-600 border-indigo-600'
-                          : 'border-zinc-300 hover:border-indigo-400'
+                          : 'border-zinc-300 dark:border-zinc-600 hover:border-indigo-400'
                       }`}
                     >
                       {subtask.completed && (
@@ -265,14 +265,14 @@ export const TodoEditModal: React.FC<TodoEditModalProps> = ({
                     </button>
                     <span
                       className={`flex-1 text-sm ${
-                        subtask.completed ? 'text-zinc-400 line-through' : 'text-zinc-700'
+                        subtask.completed ? 'text-zinc-400 dark:text-zinc-500 line-through' : 'text-zinc-700 dark:text-zinc-300'
                       }`}
                     >
                       {subtask.title}
                     </span>
                     <button
                       onClick={() => onDeleteSubtask?.(todo!.id, subtask.id)}
-                      className="opacity-0 group-hover:opacity-100 p-1 text-zinc-400 hover:text-red-500 transition-all"
+                      className="opacity-0 group-hover:opacity-100 p-1 text-zinc-400 dark:text-zinc-500 hover:text-red-500 transition-all"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -281,15 +281,15 @@ export const TodoEditModal: React.FC<TodoEditModalProps> = ({
 
                 {/* 添加子任务 */}
                 <form onSubmit={handleAddSubtask} className="flex items-center gap-3 pt-2">
-                  <div className="w-5 h-5 rounded border-2 border-dashed border-zinc-300 flex items-center justify-center">
-                    <Plus className="w-3 h-3 text-zinc-400" />
+                  <div className="w-5 h-5 rounded border-2 border-dashed border-zinc-300 dark:border-zinc-600 flex items-center justify-center">
+                    <Plus className="w-3 h-3 text-zinc-400 dark:text-zinc-500" />
                   </div>
                   <input
                     type="text"
                     value={newSubtaskTitle}
                     onChange={(e) => setNewSubtaskTitle(e.target.value)}
                     placeholder="添加子任务..."
-                    className="flex-1 text-sm text-zinc-700 placeholder:text-zinc-400 border-0 focus:outline-none focus:ring-0 p-0"
+                    className="flex-1 text-sm text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 border-0 focus:outline-none focus:ring-0 p-0 bg-transparent"
                   />
                 </form>
               </div>
@@ -298,15 +298,15 @@ export const TodoEditModal: React.FC<TodoEditModalProps> = ({
 
           {/* 提醒设置 */}
           {!isNew && todo && (
-            <div className="border border-zinc-200 rounded-xl overflow-hidden">
-              <div className="px-4 py-3 bg-zinc-50 border-b border-zinc-200 flex items-center justify-between">
+            <div className="border border-zinc-200 dark:border-zinc-700 rounded-xl overflow-hidden">
+              <div className="px-4 py-3 bg-zinc-50 dark:bg-zinc-700/50 border-b border-zinc-200 dark:border-zinc-700 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Bell className="w-4 h-4 text-zinc-400" />
-                  <span className="text-sm font-medium text-zinc-700">提醒</span>
+                  <Bell className="w-4 h-4 text-zinc-400 dark:text-zinc-500" />
+                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">提醒</span>
                 </div>
                 <button
                   onClick={() => setIsReminderModalOpen(true)}
-                  className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                  className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium"
                 >
                   {todo.reminder_id ? '修改' : '设置'}
                 </button>
@@ -315,13 +315,13 @@ export const TodoEditModal: React.FC<TodoEditModalProps> = ({
               <div className="p-4">
                 {todo.reminder_id && reminders ? (
                   <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-2 text-sm text-zinc-700">
+                    <div className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
                       <Clock className="w-4 h-4 text-indigo-500" />
                       <span>
                         {todo.reminder_at && format(parseISO(todo.reminder_at), 'M月d日 HH:mm', { locale: zhCN })}
                       </span>
                     </div>
-                    <span className="text-xs px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded-full">
+                    <span className="text-xs px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-full">
                       {reminders.find((r) => r.id === todo.reminder_id)?.type === 'once'
                         ? '仅一次'
                         : reminders.find((r) => r.id === todo.reminder_id)?.type === 'daily'
@@ -334,7 +334,7 @@ export const TodoEditModal: React.FC<TodoEditModalProps> = ({
                     </span>
                   </div>
                 ) : (
-                  <p className="text-sm text-zinc-400">暂无提醒</p>
+                  <p className="text-sm text-zinc-400 dark:text-zinc-500">暂无提醒</p>
                 )}
               </div>
             </div>
@@ -342,10 +342,10 @@ export const TodoEditModal: React.FC<TodoEditModalProps> = ({
 
           {/* 图片预览 */}
           {todo?.image && (
-            <div className="border border-zinc-200 rounded-xl overflow-hidden">
-              <div className="px-4 py-3 bg-zinc-50 border-b border-zinc-200 flex items-center gap-2">
-                <ImageIcon className="w-4 h-4 text-zinc-400" />
-                <span className="text-sm font-medium text-zinc-700">图片</span>
+            <div className="border border-zinc-200 dark:border-zinc-700 rounded-xl overflow-hidden">
+              <div className="px-4 py-3 bg-zinc-50 dark:bg-zinc-700/50 border-b border-zinc-200 dark:border-zinc-700 flex items-center gap-2">
+                <ImageIcon className="w-4 h-4 text-zinc-400 dark:text-zinc-500" />
+                <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">图片</span>
               </div>
               <div className="p-4">
                 <img
@@ -359,8 +359,8 @@ export const TodoEditModal: React.FC<TodoEditModalProps> = ({
         </div>
 
         {/* 底部按钮 */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-zinc-100 bg-zinc-50">
-          <div className="flex items-center gap-2 text-sm text-zinc-500">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-zinc-100 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/50">
+          <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
             <AlertCircle className="w-4 h-4" />
             <span>按 Ctrl+Enter 快速保存</span>
           </div>
@@ -368,7 +368,7 @@ export const TodoEditModal: React.FC<TodoEditModalProps> = ({
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg transition-colors"
+              className="px-4 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded-lg transition-colors"
             >
               取消
             </button>

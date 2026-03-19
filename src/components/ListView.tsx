@@ -206,8 +206,10 @@ export const ListView: React.FC<ListViewProps> = ({
     return (
       <div
         key={todo.id}
-        className={`bg-white border rounded-xl p-4 shadow-sm transition-all hover:shadow-md ${
-          todo.completed ? 'border-zinc-200 opacity-75' : 'border-zinc-200'
+        className={`bg-white dark:bg-zinc-800 border rounded-xl p-4 shadow-sm transition-all hover:shadow-md ${
+          todo.completed 
+            ? 'border-zinc-200 dark:border-zinc-700 opacity-75' 
+            : 'border-zinc-200 dark:border-zinc-700'
         }`}
       >
         <div className="flex items-start gap-3">
@@ -217,7 +219,7 @@ export const ListView: React.FC<ListViewProps> = ({
             className={`mt-0.5 w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${
               todo.completed
                 ? 'bg-indigo-600 border-indigo-600'
-                : 'border-zinc-300 hover:border-indigo-500'
+                : 'border-zinc-300 dark:border-zinc-600 hover:border-indigo-500'
             }`}
           >
             {todo.completed && (
@@ -231,8 +233,8 @@ export const ListView: React.FC<ListViewProps> = ({
             {/* 标题行 */}
             <div className="flex items-center gap-2 flex-wrap">
               <p
-                className={`text-base font-medium cursor-pointer hover:text-indigo-600 transition-colors ${
-                  todo.completed ? 'text-zinc-400 line-through' : 'text-zinc-900'
+                className={`text-base font-medium cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors ${
+                  todo.completed ? 'text-zinc-400 dark:text-zinc-500 line-through' : 'text-zinc-900 dark:text-zinc-100'
                 }`}
                 onClick={() => handleOpenEditModal(todo)}
               >
@@ -241,7 +243,7 @@ export const ListView: React.FC<ListViewProps> = ({
               
               {/* 优先级标签 */}
               <span
-                className={`text-[10px] px-1.5 py-0.5 rounded border font-medium ${priorityConfig.bg} ${priorityConfig.text} ${priorityConfig.border}`}
+                className={`text-[10px] px-1.5 py-0.5 rounded border font-medium ${priorityConfig.bg} dark:bg-opacity-20 ${priorityConfig.text} ${priorityConfig.border}`}
               >
                 {priorityConfig.label}
               </span>
@@ -260,7 +262,7 @@ export const ListView: React.FC<ListViewProps> = ({
 
             {/* 描述预览 */}
             {todo.description && (
-              <p className="mt-1 text-sm text-zinc-500 line-clamp-2">
+              <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400 line-clamp-2">
                 {todo.description.slice(0, 100)}
                 {todo.description.length > 100 && '...'}
               </p>
@@ -276,7 +278,7 @@ export const ListView: React.FC<ListViewProps> = ({
               )}
               
               {subtasks.length > 0 && (
-                <span className="text-xs text-zinc-400 flex items-center gap-1"
+                <span className="text-xs text-zinc-400 dark:text-zinc-500 flex items-center gap-1"
                 >
                   <ListTodo className="w-3 h-3" />
                   {completedSubtasks}/{subtasks.length}
@@ -295,7 +297,7 @@ export const ListView: React.FC<ListViewProps> = ({
                       className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
                         st.completed
                           ? 'bg-indigo-500 border-indigo-500'
-                          : 'border-zinc-300 hover:border-indigo-400'
+                          : 'border-zinc-300 dark:border-zinc-600 hover:border-indigo-400'
                       }`}
                     >
                       {st.completed && (
@@ -306,7 +308,7 @@ export const ListView: React.FC<ListViewProps> = ({
                     </button>
                     <span
                       className={`text-sm ${
-                        st.completed ? 'text-zinc-400 line-through' : 'text-zinc-600'
+                        st.completed ? 'text-zinc-400 dark:text-zinc-500 line-through' : 'text-zinc-600 dark:text-zinc-400'
                       }`}
                     >
                       {st.title}
@@ -314,7 +316,7 @@ export const ListView: React.FC<ListViewProps> = ({
                   </div>
                 ))}
                 {subtasks.length > 3 && (
-                  <span className="text-xs text-zinc-400">+{subtasks.length - 3} 个子任务</span>
+                  <span className="text-xs text-zinc-400 dark:text-zinc-500">+{subtasks.length - 3} 个子任务</span>
                 )}
               </div>
             )}
@@ -336,18 +338,18 @@ export const ListView: React.FC<ListViewProps> = ({
                     }))
                   }
                   placeholder="添加子任务..."
-                  className="flex-1 text-sm bg-transparent border-none focus:ring-0 p-0 text-zinc-600 placeholder:text-zinc-400"
+                  className="flex-1 text-sm bg-transparent border-none focus:ring-0 p-0 text-zinc-600 dark:text-zinc-400 placeholder:text-zinc-400"
                 />
               </form>
             )}
           </div>
 
-          {/* 操作按钮 */}
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+          {/* 操作按钮 - 移动端默认显示，桌面端悬停显示 */}
+          <div className="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
           >
             <button
               onClick={() => handleOpenEditModal(todo)}
-              className="p-2 text-zinc-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+              className="p-2 text-zinc-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
               title="编辑"
             >
               <Edit2 className="w-4 h-4" />
@@ -358,7 +360,7 @@ export const ListView: React.FC<ListViewProps> = ({
                   onDeleteTodo(todo.id);
                 }
               }}
-              className="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              className="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
               title="删除"
             >
               <X className="w-4 h-4" />
@@ -371,20 +373,20 @@ export const ListView: React.FC<ListViewProps> = ({
 
   if (isLoading) {
     return (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="text-zinc-500">加载中...</div>
+      <div className="flex-1 flex items-center justify-center bg-zinc-50 dark:bg-zinc-900">
+        <div className="text-zinc-500 dark:text-zinc-400">加载中...</div>
       </div>
     );
   }
 
   return (
     <>
-      <div className="flex-1 flex flex-col h-full overflow-hidden bg-zinc-50">
+      <div className="flex-1 flex flex-col h-full overflow-hidden bg-zinc-50 dark:bg-zinc-900">
         {/* Header */}
-        <header className="bg-white border-b border-zinc-200 px-6 py-4">
+        <header className="bg-white dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700 px-6 py-4">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-zinc-900">{getListTitle()}</h2>
-            <span className="text-sm text-zinc-500">{filteredTodos.length} 个任务</span>
+            <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{getListTitle()}</h2>
+            <span className="text-sm text-zinc-500 dark:text-zinc-400">{filteredTodos.length} 个任务</span>
           </div>
 
           {/* Filter & Search */}
@@ -396,27 +398,27 @@ export const ListView: React.FC<ListViewProps> = ({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="搜索任务..."
-                className="w-full pl-9 pr-4 py-2 text-sm rounded-lg border border-zinc-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full pl-9 pr-4 py-2 text-sm rounded-lg border border-zinc-200 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-zinc-400 hover:text-zinc-600"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
                 >
                   <X className="w-3 h-3" />
                 </button>
               )}
             </div>
 
-            <div className="flex bg-zinc-100 p-1 rounded-lg">
+            <div className="flex bg-zinc-100 dark:bg-zinc-700 p-1 rounded-lg">
               {(['all', 'active', 'completed'] as const).map((f) => (
                 <button
                   key={f}
                   onClick={() => setFilter(f)}
                   className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
                     filter === f
-                      ? 'bg-white text-zinc-900 shadow-sm'
-                      : 'text-zinc-600 hover:text-zinc-900'
+                      ? 'bg-white dark:bg-zinc-600 text-zinc-900 dark:text-zinc-100 shadow-sm'
+                      : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
                   }`}
                 >
                   {f === 'all' ? '全部' : f === 'active' ? '进行中' : '已完成'}
@@ -436,25 +438,25 @@ export const ListView: React.FC<ListViewProps> = ({
                 value={newTaskTitle}
                 onChange={(e) => setNewTaskTitle(e.target.value)}
                 placeholder="添加新任务..."
-                className="flex-1 px-4 py-3 rounded-xl border border-zinc-200 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="flex-1 px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
               <div className="flex gap-3">
                 <select
                   value={newTaskPriority}
                   onChange={(e) => setNewTaskPriority(e.target.value as Priority)}
-                  className="px-4 py-3 rounded-xl border border-zinc-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-zinc-700"
+                  className="px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 flex-1 sm:flex-none"
                 >
-                  <option value="low">低优先级</option>
-                  <option value="medium">中优先级</option>
-                  <option value="high">高优先级</option>
+                  <option value="low">低</option>
+                  <option value="medium">中</option>
+                  <option value="high">高</option>
                 </select>
                 <button
                   type="submit"
                   disabled={!newTaskTitle.trim()}
-                  className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 shadow-sm"
+                  className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 shadow-sm"
                 >
                   <Plus className="w-5 h-5" />
-                  添加
+                  <span className="hidden sm:inline">添加</span>
                 </button>
               </div>
             </form>
@@ -463,7 +465,7 @@ export const ListView: React.FC<ListViewProps> = ({
             <div className="space-y-3">
               {filteredTodos.length === 0 ? (
                 <div className="text-center py-12">
-                  <p className="text-zinc-500">
+                  <p className="text-zinc-500 dark:text-zinc-400">
                     {searchQuery
                       ? '没有找到匹配的任务'
                       : filter === 'all'

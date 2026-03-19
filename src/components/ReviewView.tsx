@@ -264,18 +264,18 @@ export const ReviewView = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-hidden bg-zinc-50">
-      <header className="bg-white border-b border-zinc-200 px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shrink-0">
+    <div className="flex-1 flex flex-col h-full overflow-hidden bg-zinc-50 dark:bg-zinc-900">
+      <header className="bg-white dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700 px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shrink-0">
         <div>
-          <h2 className="text-2xl font-bold text-zinc-900">Progress Review</h2>
-          <p className="text-sm text-zinc-500 mt-1">Look back at what you've accomplished.</p>
+          <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Progress Review</h2>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Look back at what you've accomplished.</p>
         </div>
         
-        <div className="flex bg-zinc-100 p-1 rounded-xl">
+        <div className="flex bg-zinc-100 dark:bg-zinc-700 p-1 rounded-xl">
           <button
             onClick={() => setPeriod('week')}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-              period === 'week' ? 'bg-white text-indigo-700 shadow-sm' : 'text-zinc-600 hover:text-zinc-900'
+              period === 'week' ? 'bg-white dark:bg-zinc-600 text-indigo-700 dark:text-indigo-400 shadow-sm' : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
             }`}
           >
             <CalendarDays className="w-4 h-4" />
@@ -284,7 +284,7 @@ export const ReviewView = () => {
           <button
             onClick={() => setPeriod('month')}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-              period === 'month' ? 'bg-white text-indigo-700 shadow-sm' : 'text-zinc-600 hover:text-zinc-900'
+              period === 'month' ? 'bg-white dark:bg-zinc-600 text-indigo-700 dark:text-indigo-400 shadow-sm' : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
             }`}
           >
             <CalendarIcon className="w-4 h-4" />
@@ -293,7 +293,7 @@ export const ReviewView = () => {
           <button
             onClick={() => setPeriod('year')}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-              period === 'year' ? 'bg-white text-indigo-700 shadow-sm' : 'text-zinc-600 hover:text-zinc-900'
+              period === 'year' ? 'bg-white dark:bg-zinc-600 text-indigo-700 dark:text-indigo-400 shadow-sm' : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
             }`}
           >
             <CalendarRange className="w-4 h-4" />
